@@ -20,7 +20,7 @@ router.get('/', async (req, res) => {
 })
 
 /* POST: /api/actions/ */
-//Working without middleware 
+//Tested
 router.post('/', [checkValidId], async (req, res) => {
     try {
         const newAction = await Action.insert(req.body);
@@ -68,18 +68,28 @@ function checkValidId(req, res, next) {
     const body = req.body;
     console.log((body).project_id);
     Project.get((body).project_id)
-    .then((response) => {
-        console.log(response.id);
-        if(response === null || response.id !== (body).project_id) {
+    .then((response1) => {
+        if(response1 === null || response1 === undefined) {
             res.status(404).json({
                 message: 'Error creating action, invalid project id'
             })
         } else {
-            next();
+            Project.get((body.project_id))
+            .then((response2) => {
+                console.log(`respnse2: ${response2.id}`);
+                console.log(`response2_project_id: ${(body).project_id}`);
+                if(response2.id == (body).project_id) {
+                    next();
+                } else {
+                    res.status(404).json({
+                        message: 'Error creating action, invalid project id'
+                    })
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            })
         }
-    })
-    .catch((err) => {
-        console.log(err);
     })
 }
 
