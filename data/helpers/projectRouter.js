@@ -19,10 +19,11 @@ router.get('/', async (req, res) => {
 })
 
 /* GET: /api/projects/actions/:id */
+//Tested
 router.get('/actions/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const actions = await Project.getProjectActions();
+        const actions = await Project.getProjectActions(id);
         res.status(200).json(actions);
     } catch(err) {
         console.log(err);

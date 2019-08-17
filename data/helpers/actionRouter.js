@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Action = require('./actionModel.js');
+const Project = require('./projectModel.js')
 
 //FULL CRUD
 /* GET: /api/actions/ */
@@ -19,8 +20,8 @@ router.get('/', async (req, res) => {
 })
 
 /* POST: /api/actions/ */
-//Tested
-router.post('/', async (req, res) => {
+//Working without middleware 
+router.post('/', [checkValidId], async (req, res) => {
     try {
         const newAction = await Action.insert(req.body);
         res.status(200).json(newAction);
@@ -61,5 +62,25 @@ router.delete('/:id', async (req,res) => {
         })
     }
 })
+
+//MiddleWare
+function checkValidId(req, res, next) {
+    const body = req.body;
+    console.log((body).project_id);
+    Project.get((body).project_id)
+    .then((response) => {
+        console.log(response.id);
+        if(response === null || response.id !== (body).project_id) {
+            res.status(404).json({
+                message: 'Error creating action, invalid project id'
+            })
+        } else {
+            next();
+        }
+    })
+    .catch((err) => {
+        console.log(err);
+    })
+}
 
 module.exports = router;
